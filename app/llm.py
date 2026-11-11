@@ -10,10 +10,19 @@ class LLM:
     ):
         self.provider = provider.lower()
         if self.provider in {"anthropic", "claude"}:
-            self.client = AsyncAnthropic(api_key=api_key)
+            self.client = AsyncAnthropic(
+                api_key=api_key,
+                timeout=60.0,
+                max_retries=0,
+            )
             self.provider = "anthropic"
         elif self.provider in {"openai", "gemini", "groq", "openai-compatible"}:
-            self.client = AsyncOpenAI(api_key=api_key, base_url=base_url)
+            self.client = AsyncOpenAI(
+                api_key=api_key,
+                base_url=base_url,
+                timeout=60.0,
+                max_retries=0,
+            )
         else:
             raise ValueError(f"unsupported LLM_PROVIDER: {provider}")
         self.model = model

@@ -101,7 +101,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(status_code=422, detail="Message can't be empty.")
         reply = await companion.generate_reply(content)
         if not reply:
-            raise HTTPException(status_code=502, detail="The model didn't return a reply.")
+            raise HTTPException(
+                status_code=502,
+                detail="The model timed out or returned no text. Check the provider/model settings and try again.",
+            )
         return {"reply": reply}
 
     @web.post("/api/tasks", status_code=201)
