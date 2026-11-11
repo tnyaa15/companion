@@ -86,8 +86,12 @@ class DiscordCompanionClient(discord.Client):
         if not content:
             return
 
-        async with message.channel.typing():
-            reply = await self.companion.generate_reply(content)
+        try:
+            async with message.channel.typing():
+                reply = await self.companion.generate_reply(content)
+        except Exception:
+            log.exception("Discord LLM call failed")
+            reply = None
         if not reply:
             await message.channel.send("my brain lagged for a sec, say that again?")
             return

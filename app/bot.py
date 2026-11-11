@@ -397,14 +397,10 @@ class Companion:
 
     async def generate_reply(self, content: str) -> str | None:
         self.db.add("user", content)
-        reply = ""
-        try:
-            reply = await self.llm.chat(
-                build_system(self.s, self.db.memories()),
-                self.db.recent(self.s.history_turns),
-            )
-        except Exception:
-            log.exception("LLM call failed")
+        reply = await self.llm.chat(
+            build_system(self.s, self.db.memories()),
+            self.db.recent(self.s.history_turns),
+        )
         if not reply:
             return None
         self.db.add("assistant", reply)
@@ -426,7 +422,11 @@ class Companion:
     async def on_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id = update.effective_chat.id
         await context.bot.send_chat_action(chat_id, ChatAction.TYPING)
-        reply = await self.generate_reply(update.message.text)
+        try:
+            reply = await self.generate_reply(update.message.text)
+        except Exception:
+            log.exception("Telegram LLM call failed")
+            reply = None
         if not reply:
             await update.message.reply_text("my brain lagged for a sec, say that again?")
             return

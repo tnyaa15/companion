@@ -99,11 +99,40 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         content = payload.content.strip()
         if not content:
             raise HTTPException(status_code=422, detail="Message can't be empty.")
-        reply = await companion.generate_reply(content)
+        try:
+            reply = await companion.generate_reply(content)
+        except Exception as exc:
+            log.exception("dashboard chat request failed")
+            status_code = getattr(exc, "status_code", None)
+            error_name = type(exc).__name__.lower()
+            if status_code == 503:
+                raise HTTPException(
+                    status_code=503,
+                    detail="The model provider is temporarily unavailable (503). Wait a moment and retry.",
+                ) from exc
+            if status_code == 429:
+                raise HTTPException(
+                    status_code=429,
+                    detail="The model provider rate limit was reached. Wait before retrying or check its quota.",
+                ) from exc
+            if status_code in {401, 403}:
+                raise HTTPException(
+                    status_code=502,
+                    detail="The provider rejected the API key or model access. Check LLM_PROVIDER and LLM_MODEL in .env.",
+                ) from exc
+            if "timeout" in error_name:
+                raise HTTPException(
+                    status_code=504,
+                    detail="The model request timed out after 60 seconds. Try again.",
+                ) from exc
+            raise HTTPException(
+                status_code=502,
+                detail="The model request failed. Check provider settings and try again.",
+            ) from exc
         if not reply:
             raise HTTPException(
                 status_code=502,
-                detail="The model timed out or returned no text. Check the provider/model settings and try again.",
+                detail="The model returned no text. Try again.",
             )
         return {"reply": reply}
 
