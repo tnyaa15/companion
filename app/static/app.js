@@ -169,7 +169,11 @@ function renderState(nextState) {
   $("#checkin-toggle").checked = state.checkin.enabled;
   $("#checkin-label").textContent = state.checkin.enabled ? "Checking in is on" : "Check-ins are paused";
   $("#checkin-summary").textContent = state.checkin.enabled ? "ON" : "PAUSED";
-  $("#proactive-channel").textContent = state.checkin.channel.toUpperCase();
+  const channelLabel = state.checkin.channel.toUpperCase();
+  const targetLabel = state.checkin.channel === "discord"
+    ? ` / ${state.checkin.discord_target.toUpperCase()}`
+    : "";
+  $("#proactive-channel").textContent = `${channelLabel}${targetLabel}`;
 
   const connections = state.connections;
   $("#local-status").textContent = "LOCAL SERVER";

@@ -530,7 +530,9 @@ def run() -> None:
             return
         from .discord_channel import DiscordCompanionClient
 
-        client = DiscordCompanionClient(companion, settings.discord_owner_id)
+        client = DiscordCompanionClient(
+            companion, settings.discord_owner_id, settings.discord_channel_id
+        )
         application.bot_data["discord_client"] = client
         task = asyncio.create_task(client.start(settings.discord_bot_token))
         application.bot_data["discord_task"] = task

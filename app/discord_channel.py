@@ -33,22 +33,32 @@ def split_message(text: str) -> list[str]:
 
 
 class DiscordCompanionClient(discord.Client):
-    def __init__(self, companion, owner_id: int):
+    def __init__(self, companion, owner_id: int, channel_id: int | None = None):
         intents = discord.Intents.default()
         intents.message_content = True
         super().__init__(intents=intents)
         self.companion = companion
         self.owner_id = owner_id
+        self.channel_id = channel_id
 
     async def on_ready(self):
         log.info("Discord companion connected as %s", self.user)
 
     async def send_to_owner(self, text: str) -> None:
-        user = self.get_user(self.owner_id)
-        if user is None:
-            user = await self.fetch_user(self.owner_id)
+        if self.channel_id is None:
+            target = self.get_user(self.owner_id)
+            if target is None:
+                target = await self.fetch_user(self.owner_id)
+        else:
+            target = self.get_channel(self.channel_id)
+            if target is None:
+                target = await self.fetch_channel(self.channel_id)
+            if getattr(target, "guild", None) is None or not callable(
+                getattr(target, "send", None)
+            ):
+                raise RuntimeError("DISCORD_CHANNEL_ID must be a server text channel")
         for chunk in split_message(text):
-            await user.send(chunk)
+            await target.send(chunk, allowed_mentions=discord.AllowedMentions.none())
 
     async def on_message(self, message: discord.Message):
         if message.author.bot or message.author.id != self.owner_id:

@@ -25,6 +25,7 @@ class Settings:
     google_calendar_id: str
     discord_bot_token: str | None
     discord_owner_id: int | None
+    discord_channel_id: int | None
 
     @staticmethod
     def load(
@@ -47,6 +48,7 @@ class Settings:
             raise ValueError(f"missing required settings: {', '.join(missing)}")
 
         discord_owner_id = env.get("DISCORD_OWNER_ID", "").strip()
+        discord_channel_id = env.get("DISCORD_CHANNEL_ID", "").strip()
         llm_provider = env.get("LLM_PROVIDER", "groq").strip().lower()
         default_base_urls = {
             "groq": "https://api.groq.com/openai/v1",
@@ -80,4 +82,5 @@ class Settings:
             google_calendar_id=env.get("GOOGLE_CALENDAR_ID", "primary"),
             discord_bot_token=env.get("DISCORD_BOT_TOKEN") or None,
             discord_owner_id=int(discord_owner_id) if discord_owner_id else None,
+            discord_channel_id=int(discord_channel_id) if discord_channel_id else None,
         )

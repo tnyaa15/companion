@@ -78,6 +78,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             "checkin": {
                 "enabled": database.get_preference("checkin_enabled", "1") == "1",
                 "channel": settings.proactive_channel,
+                "discord_target": "server" if settings.discord_channel_id else "dm",
                 "max_per_day": settings.max_proactive_per_day,
                 "quiet_start": settings.quiet_start,
                 "quiet_end": settings.quiet_end,

@@ -66,7 +66,28 @@ Set `PROACTIVE_CHANNEL=telegram` or `PROACTIVE_CHANNEL=discord` to choose where 
 
 ## Model APIs
 
-Set `LLM_PROVIDER` to `groq`, `openai`, `gemini`, or `anthropic`, then set `LLM_API_KEY` and `LLM_MODEL` for that provider. OpenAI and Gemini use their OpenAI-compatible chat endpoints; Anthropic uses its native Messages API. Leave `LLM_BASE_URL` blank for the provider default, or set it for a compatible endpoint. A ChatGPT or Claude subscription does not include API usage. Free tiers and model availability can change; OpenAI and Anthropic API usage is typically billed separately.
+Set `LLM_PROVIDER` to `groq`, `openai`, `gemini`, or `anthropic`, then set `LLM_API_KEY` and `LLM_MODEL` for that provider. OpenAI and Gemini use their OpenAI-compatible chat endpoints; Anthropic uses its native Messages API. Leave `LLM_BASE_URL` blank for the provider default, or set it for a compatible endpoint. A ChatGPT or Claude subscription does not include API usage. Hosted free tiers can change or impose limits; OpenAI and Anthropic API usage is typically billed separately.
+
+### Fully local model (no per-request bill)
+
+For inference that never switches to a paid API, install [Ollama](https://ollama.com/download) on the same computer that runs the bot, then download Qwen3 4B:
+
+```powershell
+ollama run qwen3:4b
+```
+
+Ollama's Q4_K_M build is about 2.5 GB and is Apache 2.0 licensed. The official [Hugging Face Qwen3-8B card](https://huggingface.co/Qwen/Qwen3-8B) describes reasoning, instruction following, tool use, and multilingual support. The local 8B Q4 build is about 5.2 GB; it may give stronger answers but will likely be slower on a CPU-only laptop. No hosted inference API is used in this setup; it costs local disk, memory, and electricity instead. The bot will only work while this computer and Ollama are running.
+
+Set `.env` to:
+
+```dotenv
+LLM_PROVIDER=openai-compatible
+LLM_API_KEY=ollama
+LLM_BASE_URL=http://127.0.0.1:11434/v1
+LLM_MODEL=qwen3:4b
+```
+
+Ollama ignores the placeholder API key for local requests. This project already uses an OpenAI-compatible client, so it can connect to Ollama without another provider adapter. Hugging Face Inference Providers are hosted, not local, and their free quotas may run out; pulling weights to Ollama is the option for avoiding metered inference.
 
 ## Google Calendar
 
@@ -80,6 +101,10 @@ Set `GOOGLE_CALENDAR_ID=primary` or the ID of another calendar you can access. S
 ## Discord
 
 Create a Discord application and bot, enable **Message Content Intent**, then set `DISCORD_BOT_TOKEN` and your numeric `DISCORD_OWNER_ID`. Install the bot in a private server with only the channel permissions it needs: view/read messages, send messages, and attach files. The bot ignores everyone except that configured user. Normal text uses the same conversation history as Telegram.
+
+By default, proactive check-ins and reminders go to your Discord DM. To send them to a private server text channel instead, enable Developer Mode in Discord, copy that channel's ID, and set `DISCORD_CHANNEL_ID` in `.env`. Give the bot permission to view and send messages in that channel. Leave the ID blank to keep DMs. Replies to your messages still appear in the channel where you wrote them. Proactive posts suppress Discord mentions so generated text cannot ping other members.
+
+Set `PROACTIVE_CHANNEL=discord` as well as `DISCORD_CHANNEL_ID` to route check-ins and reminders to that server channel. If `DISCORD_CHANNEL_ID` is blank, proactive messages go to your DM.
 
 To send an image or video, put it in the local `media/` folder and use `!sendmedia <filename>` in Discord. The folder is ignored by Git. Incoming images and videos are not analyzed yet; the bot will say so rather than pretend it saw their contents.
 
