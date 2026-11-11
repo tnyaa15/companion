@@ -29,6 +29,16 @@ python main.py
 
 5. Open your bot in Telegram, send `/start`, and talk.
 
+## Local dashboard
+
+After installing the requirements, start the private local control panel in a second terminal:
+
+```powershell
+.\.venv\Scripts\python.exe -m uvicorn app.web:app --host 127.0.0.1 --port 8000
+```
+
+Open <http://127.0.0.1:8000>. It uses the same SQLite database for chat, tasks, reminders, and memories. Chat is disabled until an LLM API key is configured. The server binds to loopback; do not expose this unauthenticated dashboard to a network or the public internet.
+
 ## Tweak the personality
 
 Edit `persona.md` and save. It is re-read on every message, so there is no restart needed.

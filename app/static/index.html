@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#183c38">
+  <title>Nova | Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script defer src="/assets/app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#today" aria-label="Nova home">
+        <span class="brand-mark">N</span>
+        <span class="brand-copy">NOVA<span>COMPANION CONSOLE</span></span>
+      </a>
+
+      <div class="rail-label">YOUR SPACE</div>
+      <nav class="main-nav" aria-label="Main navigation">
+        <button class="nav-link active" data-view="today"><span class="nav-number">01</span> Today</button>
+        <button class="nav-link" data-view="chat"><span class="nav-number">02</span> Conversation</button>
+        <button class="nav-link" data-view="tasks"><span class="nav-number">03</span> Tasks & reminders</button>
+        <button class="nav-link" data-view="memory"><span class="nav-number">04</span> Memory</button>
+        <button class="nav-link" data-view="connections"><span class="nav-number">05</span> Connections</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <span class="local-indicator"><i></i><span id="local-status">CONNECTING</span></span>
+        <span class="sidebar-caption">PRIVATE BY DEFAULT</span>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow"><span id="today-date">YOUR DAY</span><span class="eyebrow-divider"></span><span id="current-time">--:--</span></div>
+          <h1 id="greeting">Hey there.</h1>
+        </div>
+        <div class="topbar-tools">
+          <div class="provider-pill"><span class="provider-dot" id="model-dot"></span><span id="model-status">Checking model</span></div>
+          <button class="refresh-button" id="refresh-button" type="button">Refresh</button>
+        </div>
+      </header>
+
+      <section class="view active" id="view-today" aria-labelledby="greeting">
+        <div class="stat-strip">
+          <div class="stat-block"><span class="stat-label">OPEN TASKS</span><strong id="task-count">--</strong></div>
+          <div class="stat-block"><span class="stat-label">UP NEXT</span><strong id="reminder-count">--</strong></div>
+          <div class="stat-block"><span class="stat-label">SAVED NOTES</span><strong id="memory-count">--</strong></div>
+          <div class="stat-block stat-status"><span class="stat-label">CHECK-INS</span><strong id="checkin-summary">--</strong></div>
+        </div>
+
+        <div class="overview-grid">
+          <section class="panel pulse-panel">
+            <div class="panel-topline"><span class="panel-kicker">PULSE / 01</span><span class="pulse-mark"><i></i> ADAPTIVE</span></div>
+            <div class="pulse-copy">
+              <h2>Check-ins</h2>
+              <p>Context-led, quiet-hours aware.</p>
+            </div>
+            <label class="toggle-row" for="checkin-toggle">
+              <span id="checkin-label">Checking in is on</span>
+              <input id="checkin-toggle" type="checkbox" aria-label="Enable adaptive check-ins">
+              <span class="toggle-track" aria-hidden="true"><i></i></span>
+            </label>
+            <div class="pulse-foot"><span>DESTINATION</span><strong id="proactive-channel">TELEGRAM</strong></div>
+          </section>
+
+          <section class="panel today-task-panel">
+            <div class="panel-heading">
+              <div><span class="panel-kicker">IN MOTION / 02</span><h2>Open tasks</h2></div>
+              <button class="text-action" data-open-view="tasks" type="button">All tasks <span>↗</span></button>
+            </div>
+            <div class="compact-list" id="today-tasks"></div>
+          </section>
+
+          <section class="panel today-reminders-panel">
+            <div class="panel-heading">
+              <div><span class="panel-kicker">ON THE RADAR / 03</span><h2>Reminders</h2></div>
+              <button class="text-action" data-open-view="tasks" type="button">See all <span>↗</span></button>
+            </div>
+            <div class="compact-list" id="today-reminders"></div>
+          </section>
+
+          <section class="conversation-prompt">
+            <div class="prompt-copy"><span class="panel-kicker">NO SCRIPT, NO PRESSURE</span><h2>What’s on your mind?</h2></div>
+            <button class="prompt-button" data-open-view="chat" type="button">Open conversation <span>↗</span></button>
+            <span class="prompt-stamp">N / 01</span>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-chat" aria-labelledby="chat-title">
+        <div class="view-heading">
+          <div><span class="panel-kicker">OPEN CHANNEL / 01</span><h2 id="chat-title">Conversation</h2></div>
+          <span class="history-label">SHARED HISTORY</span>
+        </div>
+        <section class="panel chat-panel">
+          <div class="message-list" id="messages" aria-live="polite"></div>
+          <form class="chat-composer" id="chat-form">
+            <label class="sr-only" for="chat-input">Message Nova</label>
+            <textarea id="chat-input" rows="1" placeholder="Say what’s on your mind…" maxlength="4000"></textarea>
+            <button class="send-button" id="send-button" type="submit"><span>Send</span><b>↗</b></button>
+          </form>
+          <p class="composer-foot" id="chat-status">PRIVATE SESSION <span>·</span> YOUR MODEL API</p>
+        </section>
+      </section>
+
+      <section class="view" id="view-tasks" aria-labelledby="tasks-title">
+        <div class="view-heading">
+          <div><span class="panel-kicker">KEEP IT MOVING / 02</span><h2 id="tasks-title">Tasks & reminders</h2></div>
+          <span class="history-label" id="timezone-label">LOCAL TIME</span>
+        </div>
+        <div class="manage-grid">
+          <section class="panel manage-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">NEXT ACTIONS</span><h2>Tasks</h2></div><span class="count-chip" id="all-task-count">0</span></div>
+            <form class="inline-form" id="task-form">
+              <label class="sr-only" for="task-input">New task</label>
+              <input id="task-input" type="text" placeholder="Add a task…" maxlength="300" required>
+              <button class="add-button" type="submit" aria-label="Add task">+</button>
+            </form>
+            <div class="full-list" id="all-tasks"></div>
+          </section>
+
+          <section class="panel manage-panel">
+            <div class="panel-heading"><div><span class="panel-kicker">AT THE RIGHT MOMENT</span><h2>Reminders</h2></div><span class="count-chip coral-chip" id="all-reminder-count">0</span></div>
+            <form class="reminder-form" id="reminder-form">
+              <label class="sr-only" for="reminder-input">Reminder</label>
+              <input id="reminder-input" type="text" placeholder="What should I remind you?" maxlength="300" required>
+              <div class="date-submit-row">
+                <label class="sr-only" for="reminder-due">Reminder time</label>
+                <input id="reminder-due" type="datetime-local" required>
+                <button class="add-button" type="submit" aria-label="Add reminder">+</button>
+              </div>
+            </form>
+            <div class="full-list" id="all-reminders"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="view-memory" aria-labelledby="memory-title">
+        <div class="view-heading">
+          <div><span class="panel-kicker">ONLY WHAT YOU SAVE / 03</span><h2 id="memory-title">Memory</h2></div>
+          <span class="history-label"><span id="memory-count-label">0</span> / 20 SAVED</span>
+        </div>
+        <section class="panel memory-panel">
+          <form class="inline-form memory-form" id="memory-form">
+            <label class="sr-only" for="memory-input">New memory</label>
+            <input id="memory-input" type="text" placeholder="Save a preference, goal, or detail…" maxlength="300" required>
+            <button class="add-button" type="submit" aria-label="Save memory">+</button>
+          </form>
+          <div class="memory-grid" id="memory-list"></div>
+        </section>
+      </section>
+
+      <section class="view" id="view-connections" aria-labelledby="connections-title">
+        <div class="view-heading">
+          <div><span class="panel-kicker">YOUR ACCOUNTS / 04</span><h2 id="connections-title">Connections</h2></div>
+          <span class="history-label">LOCAL CONFIGURATION</span>
+        </div>
+        <div class="connections-grid">
+          <section class="connection-panel model-connection">
+            <span class="connection-index">01 / THINKING</span><div class="connection-head"><span class="connection-orbit">N</span><span class="connection-state" id="model-connection-state">CHECKING</span></div>
+            <h3 id="model-connection-name">Model API</h3><p id="model-connection-detail">Loading provider</p>
+          </section>
+          <section class="connection-panel">
+            <span class="connection-index">02 / MESSAGING</span><div class="connection-head"><span class="connection-letter telegram-letter">T</span><span class="connection-state" id="telegram-state">CHECKING</span></div>
+            <h3>Telegram</h3><p>Existing chat and reminders</p>
+          </section>
+          <section class="connection-panel">
+            <span class="connection-index">03 / MESSAGING</span><div class="connection-head"><span class="connection-letter discord-letter">D</span><span class="connection-state" id="discord-state">CHECKING</span></div>
+            <h3>Discord</h3><p>Owner-restricted chat and media</p>
+          </section>
+          <section class="connection-panel calendar-connection">
+            <span class="connection-index">04 / CALENDAR</span><div class="connection-head"><span class="connection-letter calendar-letter">C</span><span class="connection-state" id="calendar-state">CHECKING</span></div>
+            <h3>Google Calendar</h3><p id="calendar-detail">Calendar events only</p>
+            <div class="calendar-events" id="calendar-events"></div>
+          </section>
+        </div>
+      </section>
+
+      <footer class="page-footer"><span>NOVA / LOCAL COMPANION</span><span id="footer-timezone">PRIVATE BY DEFAULT</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

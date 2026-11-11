@@ -79,6 +79,24 @@ class Database:
             ).fetchall()
         return [{"role": role, "content": content} for role, content in reversed(rows)]
 
+    def recent_messages(self, limit: int = 50) -> list[dict]:
+        with self._conn() as conn:
+            rows = conn.execute(
+                "SELECT id, role, content, ts, proactive FROM messages "
+                "ORDER BY id DESC LIMIT ?",
+                (limit,),
+            ).fetchall()
+        return [
+            {
+                "id": message_id,
+                "role": role,
+                "content": content,
+                "ts": ts,
+                "proactive": bool(proactive),
+            }
+            for message_id, role, content, ts, proactive in reversed(rows)
+        ]
+
     def proactive_today(self, tz_name: str) -> int:
         """How many proactive messages were sent since local midnight."""
         local_midnight = datetime.now(ZoneInfo(tz_name)).replace(
