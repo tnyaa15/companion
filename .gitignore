@@ -2,3 +2,6 @@
 *.db
 __pycache__/
 .venv/
+client_secret*.json
+google-calendar-token.json
+media/

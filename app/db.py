@@ -36,6 +36,15 @@ CREATE TABLE IF NOT EXISTS tasks (
     created TEXT    NOT NULL,
     done    INTEGER NOT NULL DEFAULT 0
 );
+
+CREATE TABLE IF NOT EXISTS calendar_requests (
+    id       INTEGER PRIMARY KEY AUTOINCREMENT,
+    summary  TEXT    NOT NULL,
+    start_at TEXT    NOT NULL,
+    end_at   TEXT    NOT NULL,
+    status   TEXT    NOT NULL DEFAULT 'pending'
+             CHECK (status IN ('pending', 'creating', 'created', 'cancelled', 'failed'))
+);
 """
 
 
@@ -94,6 +103,22 @@ class Database:
                 """
             ).fetchone()
         return count
+
+    def latest_user_message(self) -> dict | None:
+        with self._conn() as conn:
+            row = conn.execute(
+                "SELECT id, ts FROM messages WHERE role = 'user' ORDER BY id DESC LIMIT 1"
+            ).fetchone()
+        if row is None:
+            return None
+        return {"id": row[0], "ts": row[1]}
+
+    def latest_proactive_at(self) -> str | None:
+        with self._conn() as conn:
+            row = conn.execute(
+                "SELECT ts FROM messages WHERE proactive = 1 ORDER BY id DESC LIMIT 1"
+            ).fetchone()
+        return row[0] if row else None
 
     def clear(self) -> None:
         with self._conn() as conn:
@@ -202,3 +227,45 @@ class Database:
         with self._conn() as conn:
             cursor = conn.execute("DELETE FROM tasks WHERE id = ?", (task_id,))
             return cursor.rowcount > 0
+
+    def add_calendar_request(self, summary: str, start_at: str, end_at: str) -> int:
+        with self._conn() as conn:
+            cursor = conn.execute(
+                "INSERT INTO calendar_requests (summary, start_at, end_at) "
+                "VALUES (?, ?, ?)",
+                (summary, start_at, end_at),
+            )
+            return cursor.lastrowid
+
+    def calendar_request(self, request_id: int) -> dict | None:
+        with self._conn() as conn:
+            row = conn.execute(
+                "SELECT id, summary, start_at, end_at, status "
+                "FROM calendar_requests WHERE id = ?",
+                (request_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "id": row[0],
+            "summary": row[1],
+            "start_at": row[2],
+            "end_at": row[3],
+            "status": row[4],
+        }
+
+    def claim_calendar_request(self, request_id: int) -> bool:
+        with self._conn() as conn:
+            cursor = conn.execute(
+                "UPDATE calendar_requests SET status = 'creating' "
+                "WHERE id = ? AND status = 'pending'",
+                (request_id,),
+            )
+            return cursor.rowcount > 0
+
+    def set_calendar_request_status(self, request_id: int, status: str) -> None:
+        with self._conn() as conn:
+            conn.execute(
+                "UPDATE calendar_requests SET status = ? WHERE id = ?",
+                (status, request_id),
+            )
